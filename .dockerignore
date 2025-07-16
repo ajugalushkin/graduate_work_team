@@ -1,0 +1,67 @@
+# Version control
+.git/
+.gitignore
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python cache and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# Build outputs and temporary files
+dist/
+build/
+out/
+tmp/
+temp/
+*.tmp
+
+# Test and debug files
+test/
+tests/
+debug/
+*.log
+
+# Environment and secrets
+.env*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Documentation and markdown
+/docs/
+*.md
+README*
+
+# Docker and Compose files
+Dockerfile*
+docker-compose-kafka.yaml
+docker-compose.yaml
+
+# Project-specific patterns
+*.bak
+
+# Exclude virtual environments
+.venv/
+
+# Exclude PlantUML diagrams
+*.puml
+
+# Exclude backup files
+*.bak
+
+# Exclude any other local or user-specific folders
+.local/
+local/
+
+# Exclude nothing else; keep .lock files and do not exclude them as per instructions
