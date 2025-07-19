@@ -3,7 +3,7 @@
 
 ## Переходим в Яндекс Диалоги
 
-[https://dialogs.yandex.ru/developer/](https://dialogs.yandex.ru/developer/)
+[https://i.postimg.cc/W4q79Mds/alice.png](https://i.postimg.cc/W4q79Mds/alice.png)
 
 Тут необходимо создать навык.
 
