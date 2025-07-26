@@ -44,7 +44,7 @@ config.local.*
 README*
 
 # Docker and Compose files
-Dockerfile*
+etl/Dockerfile
 docker-compose-kafka.yaml
 docker-compose.yaml
 

@@ -1,15 +1,15 @@
-version: '3.8'
-
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
     container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ports:
-      - "9200:9200"
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     networks:
       - esnet
 
@@ -19,25 +19,28 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - esnet
+      - ELASTICSEARCH_HOSTS=${ELASTIC_URL}
+    env_file:
+      - .env
     depends_on:
       - elasticsearch
+    networks:
+      - esnet
 
   loader:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: tmdb-loader
+    build: etl/
     environment:
-      - TMDB_API_KEY=your_tmdb_key_here
-      - ELASTIC_URL=http://elasticsearch:9200
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - ELASTIC_URL=${ELASTIC_URL}
     depends_on:
       - elasticsearch
+    env_file:
+      - .env
     networks:
       - esnet
-    restart: "no"
+
+volumes:
+  elasticdata:
 
 networks:
   esnet:
