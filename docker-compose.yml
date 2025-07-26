@@ -1,0 +1,15 @@
+services:
+  alice:
+    build:
+      context: ./alice
+    container_name: alice_api
+    restart: unless-stopped
+    init: true
+    ports:
+      - 8000:8000
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
