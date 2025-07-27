@@ -11,11 +11,11 @@ build:			## Run Docker services
 
 .PHONY: up
 up:			## Run Docker services
-	docker compose ${DOCKER_COMPOSE_FILES} up -d
+	@COMPOSE_BAKE=true docker compose ${DOCKER_COMPOSE_FILES} up -d --build
 
 .PHONY: down
 down:			## Stop Docker services
-	docker compose ${DOCKER_COMPOSE_FILES} down
+	docker compose ${DOCKER_COMPOSE_FILES} down --remove-orphans
 
 .PHONY: ps
 ps:			## Show Docker containers info
