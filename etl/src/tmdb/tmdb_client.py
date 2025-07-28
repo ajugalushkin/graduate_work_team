@@ -9,7 +9,7 @@ class TMDBClient:
 
     def get(self, path, **params):
         url = f"https://api.themoviedb.org/3{path}"
-        params.update({"api_key": self.api_key, "language": settings.tmdv_language_code})
+        params.update({"api_key": self.api_key, "language": settings.tmdb_language_code})
         response = requests.get(url, params=params)
         response.raise_for_status()
         return response.json()
