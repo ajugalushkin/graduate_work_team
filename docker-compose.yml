@@ -12,3 +12,10 @@
         - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
       networks:
         - esnet
+
+networks:
+  esnet:
+    driver: bridge
+
+volumes:
+  elasticdata:
