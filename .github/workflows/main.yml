@@ -5,50 +5,96 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Login (Yandex Cloud)
+      id: login-cr
+      uses: yc-actions/yc-cr-login@v1
       with:
-        python-version: '3.11'
+        yc-sa-json-credentials: ${{ secrets.AUTHORIZED_KEY}}
 
-    - name: Install dependencies
+    - name: Build image (Yandex Cloud)
+      env:
+        CR_REGISTRY: crp7qfv6r081t2ofp030
+        CR_REPOSITORY: backend
+        IMAGE_TAG: ${{ github.sha}}
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:user$IMAGE_TAG ./homeworks/K33412/Tanachev\ Egor/HW6/task/user 
+        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY: user$IMAGE_TAG
+        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY: market $IMAGE_TAG ./homeworks/K33412/Tanachev\ Egor/HW6/task/market 
+        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:marketŞIMAGE_TAG
+        
+    - name: Connect to VM via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: 51.250.111.202
+        username: admin
+        key: ${{ secrets.KEY }}
+        passphrase: ${{ secrets.PASSPHRASE}}
+        port: 22
 
-    - name: Create deployment package
+    - name: Run commands on VM
+      env:
+        YANDEX_KEY: ${{ secrets.YANDEX_KEY }}
+        IMAGE TAG: ${{ github.sha}}
       run: |
-        mkdir -p deploy
-        cp -R *.py requirements.txt deploy/
-        # Добавьте другие необходимые файлы
-        tar -czvf deploy.tar.gz deploy
+        sudo docker login --username oauth --password $YANDEX_KEY cr.yandex
+        if [ $(docker ps -q)" ]; then
+        fi
+        sudo docker kill $(docker ps -q) &> /dev/null
+        if [ "$(docker ps -a -q)" ]; then
+        fi
+        sudo docker rm $(docker ps -a -q) &> /dev/null
+        sudo docker run -dp 80:1111 cr.yandex/crp7qfv6r081t2ofp030/backend:user${{ github.sha}} && sudo docker run -dp 81:2222 cr.yandex/crp7qfv6r081t2ofp030/backend: market${{ github.sha }}
 
-    - name: Deploy to VM
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.VM_IP }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        source: "deploy.tar.gz"
-        target: "/home/${{ secrets.SSH_USER }}/deploy"
-
-    - name: Run deployment script on VM
-      uses: appleboy/ssh-action@v1.1.3
-      with:
-        host: ${{ secrets.VM_IP }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          cd /home/${{ secrets.SSH_USER }}/deploy
-          tar -xzvf deploy.tar.gz
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r deploy/requirements.txt
-          # Остановка и перезапуск сервиса
-          sudo systemctl restart my-app.service
+#jobs:
+#  deploy:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#    - name: Checkout code
+#      uses: actions/checkout@v4
+#
+#    - name: Set up Python
+#      uses: actions/setup-python@v5
+#      with:
+#        python-version: '3.11'
+#
+#    - name: Install dependencies
+#      run: |
+#        python -m pip install --upgrade pip
+#        pip install -r requirements.txt
+#
+#    - name: Create deployment package
+#      run: |
+#        mkdir -p deploy
+#        cp -R *.py requirements.txt deploy/
+#        # Добавьте другие необходимые файлы
+#        tar -czvf deploy.tar.gz deploy
+#
+#    - name: Deploy to VM
+#      uses: appleboy/scp-action@v0.1.7
+#      with:
+#        host: ${{ secrets.VM_IP }}
+#        username: ${{ secrets.SSH_USER }}
+#        key: ${{ secrets.SSH_KEY }}
+#        source: "deploy.tar.gz"
+#        target: "/home/${{ secrets.SSH_USER }}/deploy"
+#
+#    - name: Run deployment script on VM
+#      uses: appleboy/ssh-action@v1.1.3
+#      with:
+#        host: ${{ secrets.VM_IP }}
+#        username: ${{ secrets.SSH_USER }}
+#        key: ${{ secrets.SSH_KEY }}
+#        script: |
+#          cd /home/${{ secrets.SSH_USER }}/deploy
+#          tar -xzvf deploy.tar.gz
+#          python -m venv venv
+#          source venv/bin/activate
+#          pip install -r deploy/requirements.txt
+#          # Остановка и перезапуск сервиса
+#          sudo systemctl restart my-app.service
