@@ -1,9 +1,9 @@
 # Version control
 .git/
-.gitignore
+../.gitignore
 
 # IDE and editor files
-.idea/
+../../.idea/
 .vscode/
 *.swp
 *.swo
@@ -30,7 +30,7 @@ debug/
 *.log
 
 # Environment and secrets
-.env*
+.env
 *.env
 *.pem
 *.key
@@ -44,7 +44,7 @@ config.local.*
 README*
 
 # Docker and Compose files
-Dockerfile*
+etl/Dockerfile
 docker-compose-kafka.yaml
 docker-compose.yaml
 
