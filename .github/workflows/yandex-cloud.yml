@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 # Создаем имена образов
-#env:
-#  ETL_IMAGE: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
+env:
+  ETL_IMAGE_URL: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
 
 jobs:
   build:
@@ -25,21 +25,21 @@ jobs:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
     # Сборка и загрузка образа
-#    - name: Build and Push to YCR
-#      uses: docker/build-push-action@v3
-#      with:
-#        context: ./etl
-#        file: ./etl/Dockerfile
-#        push: true
-#        tags: ${{ env.ETL_IMAGE }}
-    - name: Build, tag, and push ETL image to Yandex Cloud Container Registry
-      env:
-        CR_REGISTRY: ${{ secrets.YC_REGISTRY_ID }}
-        CR_REPOSITORY: etl
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG ./etl
-        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
+    - name: Build and Push to YCR
+      uses: docker/build-push-action@v3
+      with:
+        context: ./etl
+        file: ./etl/Dockerfile
+        push: true
+        tags: ${{ env.ETL_IMAGE_URL }}
+#    - name: Build, tag, and push ETL image to Yandex Cloud Container Registry
+#      env:
+#        CR_REGISTRY: ${{ secrets.YC_REGISTRY_ID }}
+#        CR_REPOSITORY: etl
+#        IMAGE_TAG: ${{ github.sha }}
+#      run: |
+#        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG ./etl
+#        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
 
   # Деплоим на VM
   deploy:
@@ -47,16 +47,16 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Deploy COI VM
         id: deploy-coi
-        uses: yc-actions/yc-coi-deploy@b22db2965c8af6bf0980e8b026c5e80ad6e15adf
+        uses: yc-actions/yc-coi-deploy@v1.0.1
         env:
-          ETL_IMAGE_URL: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
+          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
+          YC_VM_SSH: ${{ secrets.SSH_KEY }}
+          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
