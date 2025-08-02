@@ -32,14 +32,6 @@ jobs:
         file: ./etl/Dockerfile
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
-#    - name: Build, tag, and push ETL image to Yandex Cloud Container Registry
-#      env:
-#        CR_REGISTRY: ${{ secrets.YC_REGISTRY_ID }}
-#        CR_REPOSITORY: etl
-#        IMAGE_TAG: ${{ github.sha }}
-#      run: |
-#        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG ./etl
-#        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
 
   # Деплоим на VM
   deploy:
@@ -63,26 +55,5 @@ jobs:
           vm-name: ${{ secrets.YC_VM_NAME }}
           vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
           vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
-          user-data-path: './user-data.yaml'
-          docker-compose-path: './docker-compose.yc.yaml'
-#  deploy:
-#    runs-on: ubuntu-latest
-#    needs: [build-and-push]
-#    steps:
-#    - name: Checkout
-#      uses: actions/checkout@v3
-#
-#    - name: Deploy COI VM
-#      uses: yc-actions/yc-coi-deploy@v1.0.1
-#      env:
-#        ETL_IMAGE: ${{ env.ETL_IMAGE }}
-#        YC_VM_SSH: ${{ secrets.SSH_KEY }}
-#        YC_VM_USERNAME: ${{ secrets.SSH_USER }}
-#      with:
-#        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-#        folder-id: ${{ secrets.YC_FOLDER_ID }}
-#        vm-name: ${{ secrets.YC_VM_NAME }}
-#        vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
-#        vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
-#        docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
-#        user-data-path: './yandex-cloud/user-data.yaml'
+          user-data-path: './yandex-cloud/user-data.yaml'
+          docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
