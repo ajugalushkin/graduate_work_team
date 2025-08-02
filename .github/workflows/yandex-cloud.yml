@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Deploy to Yandex Cloud
 
 on:
   push:
@@ -6,42 +6,50 @@ on:
   workflow_dispatch:
 
 env:
-  ETL_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/etl:${{ github.sha }}
+  REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+  ETL_IMAGE: cr.yandex/${{ env.REGISTRY_ID }}/etl:${{ github.sha }}
 
 jobs:
-  build-etl:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    
-    - name: Login to Dockerhub
-      uses: docker/login-action@v2
+
+    # Установка YC CLI и аутентификация
+    - name: Setup YC CLI
+      uses: yc-actions/yc-cli@v1
       with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+        folder-id: ${{ secrets.YC_FOLDER_ID }}
 
-    - name: Setup Buildx
-      uses: docker/setup-buildx-action@v2
+    # Аутентификация Docker в YCR
+    - name: Login to Yandex Container Registry
+      run: |
+        IAM_TOKEN=$(yc iam create-token)
+        echo $IAM_TOKEN | docker login \
+          --username iam \
+          --password-stdin \
+          cr.yandex
 
-    - name: Build Backend
+    # Сборка и загрузка образа
+    - name: Build and Push to YCR
       uses: docker/build-push-action@v3
       with:
         context: ./etl
         file: ./etl/Dockerfile
         push: true
-        tags: ${{ env.ETL_IMAGE }}
+        tags: ${{ env.ETL_IMAGE }}  # Используется YCR-тег
 
-  update-yc:
+  deploy:
     runs-on: ubuntu-latest
-    needs: [build-etl]
+    needs: [build-and-push]  # Зависит от успешной сборки
     steps:
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Deploy COI VM
-      id: deploy-coi
       uses: yc-actions/yc-coi-deploy@v1.0.1
       env:
         ETL_IMAGE: ${{ env.ETL_IMAGE }}
@@ -55,3 +63,61 @@ jobs:
         vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
         docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
         user-data-path: './yandex-cloud/user-data.yaml'
+
+#name: Docker Image CI
+#
+#on:
+#  push:
+#    branches: [ "main" ]
+#  workflow_dispatch:
+#
+#env:
+#  ETL_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/etl:${{ github.sha }}
+#
+#jobs:
+#  build-etl:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v3
+#
+#    - name: Login to Dockerhub
+#      uses: docker/login-action@v2
+#      with:
+#        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+#
+#    - name: Setup Buildx
+#      uses: docker/setup-buildx-action@v2
+#
+#    - name: Build Backend
+#      uses: docker/build-push-action@v3
+#      with:
+#        context: ./etl
+#        file: ./etl/Dockerfile
+#        push: true
+#        tags: ${{ env.ETL_IMAGE }}
+#
+#  update-yc:
+#    runs-on: ubuntu-latest
+#    needs: [build-etl]
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v3
+#
+#    - name: Deploy COI VM
+#      id: deploy-coi
+#      uses: yc-actions/yc-coi-deploy@v1.0.1
+#      env:
+#        ETL_IMAGE: ${{ env.ETL_IMAGE }}
+#        YC_VM_SSH: ${{ secrets.SSH_KEY }}
+#        YC_VM_USERNAME: ${{ secrets.SSH_USER }}
+#      with:
+#        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+#        folder-id: ${{ secrets.YC_FOLDER_ID }}
+#        vm-name: ${{ secrets.YC_VM_NAME }}
+#        vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
+#        vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
+#        docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
+#        user-data-path: './yandex-cloud/user-data.yaml'
