@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: 📦 Checkout
       uses: actions/checkout@v3
 
-    - name: Login to Yandex Cloud Container Registry
+    - name: 🔐 Login to Yandex Cloud Container Registry
       uses: yc-actions/yc-cr-login@v2
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
-    - name: Build and push Docker image
+    - name: 🐳 Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         context: ./etl
@@ -29,7 +29,7 @@ jobs:
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
 
-    - name: Copy config files to VM
+    - name: 📁 Copy configs to VM
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -38,7 +38,7 @@ jobs:
         source: "yandex-cloud/*"
         target: "~/deploy"
 
-    - name: Deploy and run containers
+    - name: 🚀 Deploy and run containers on VM
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -47,12 +47,29 @@ jobs:
         script: |
           set -e
           cd ~/deploy
+
+          echo "📂 Текущие файлы:"
+          ls -la
+
           if [ ! -f docker-compose.yc.yaml ]; then
             echo "❌ docker-compose.yc.yaml not found!"
-            ls -la
             exit 1
           fi
+
+          echo "🔍 Проверка docker-compose:"
+          if ! command -v docker-compose &> /dev/null; then
+            echo "❗ docker-compose не установлен. Установи его вручную или используй 'docker compose'"
+            exit 1
+          fi
+
+          echo "🔐 Docker login to YCR..."
           docker login cr.yandex -u iam --password ${{ secrets.YC_IAM_TOKEN }}
+
+          echo "📥 Pull latest image..."
           docker pull ${{ env.ETL_IMAGE_URL }}
+
+          echo "🧹 Stopping old containers..."
           docker-compose -f docker-compose.yc.yaml down || true
+
+          echo "🚀 Starting new containers..."
           docker-compose -f docker-compose.yc.yaml up -d
