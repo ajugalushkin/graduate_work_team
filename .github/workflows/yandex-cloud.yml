@@ -16,21 +16,26 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Установка YC CLI и аутентификация
-    - name: Setup YC CLI
-      uses: yc-actions/yc-cli@v1
+#    # Установка YC CLI и аутентификация
+#    - name: Setup YC CLI
+#      uses: yc-actions/yc-cli@v1
+#      with:
+#        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+#        folder-id: ${{ secrets.YC_FOLDER_ID }}
+#
+#    # Аутентификация Docker в YCR
+#    - name: Login to Yandex Container Registry
+#      run: |
+#        IAM_TOKEN=$(yc iam create-token)
+#        echo $IAM_TOKEN | docker login \
+#          --username iam \
+#          --password-stdin \
+#          cr.yandex
+    - name: Login to Yandex Cloud Container Registry
+      id: login-cr
+      uses: yc-actions/yc-cr-login@v1
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-        folder-id: ${{ secrets.YC_FOLDER_ID }}
-
-    # Аутентификация Docker в YCR
-    - name: Login to Yandex Container Registry
-      run: |
-        IAM_TOKEN=$(yc iam create-token)
-        echo $IAM_TOKEN | docker login \
-          --username iam \
-          --password-stdin \
-          cr.yandex
 
     # Сборка и загрузка образа
     - name: Build and Push to YCR
