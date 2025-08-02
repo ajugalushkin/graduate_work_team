@@ -10,7 +10,7 @@ env:
   ETL_IMAGE_URL: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,6 +33,9 @@ jobs:
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
 
+    - name: Debug — list files
+      run: ls -laR
+
     # Копирование файлов на VM
     - name: Copy docker-compose and configs to VM
       uses: appleboy/scp-action@v0.1.7
@@ -40,8 +43,11 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
-        source: "yandex-cloud/docker-compose.yc.yaml,yandex-cloud/user-data.yaml"
+        source: "yandex-cloud/"
         target: "~/deploy"
+
+    - name: Debug — list files
+      run: ls -laR
 
     # Запуск на удаленной VM
     - name: Deploy and run on VM
@@ -52,6 +58,11 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ~/deploy
+          if [ ! -f docker-compose.yc.yaml ]; then
+            echo "❌ docker-compose.yc.yaml not found"
+            ls -la
+            exit 1
+          fi
           docker login cr.yandex -u iam --password ${{ secrets.YC_IAM_TOKEN }}
           docker pull ${{ env.ETL_IMAGE_URL }}
           docker-compose -f docker-compose.yc.yaml down || true
