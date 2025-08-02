@@ -54,14 +54,8 @@ jobs:
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
-#          vm-name: ${{ secrets.YC_VM_NAME }}
-          vm-name: test-vm
+          vm-name: ${{ secrets.YC_VM_NAME }}
           vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
           vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
-          vm-cores: 2
-          vm-platform-id: 'standard-v2'
-          vm-memory: 512Mb
-          vm-disk-size: 30Gb
-          vm-core-fraction: 5
           user-data-path: './yandex-cloud/user-data.yaml'
           docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
