@@ -6,8 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
-  ETL_IMAGE: cr.yandex/${{ env.REGISTRY_ID }}/etl:${{ github.sha }}
+  ETL_IMAGE: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
 
 jobs:
   build-and-push:
