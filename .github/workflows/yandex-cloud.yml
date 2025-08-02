@@ -69,7 +69,7 @@ jobs:
           docker pull ${{ env.ETL_IMAGE_URL }}
 
           echo "🧹 Stopping old containers..."
-          docker-compose -f docker-compose.yc.yaml down || true
+          docker-compose -f yandex-cloud/docker-compose.yc.yaml down || true
 
           echo "🚀 Starting new containers..."
-          docker-compose -f docker-compose.yc.yaml up -d
+          docker-compose -f yandex-cloud/docker-compose.yc.yaml up -d
