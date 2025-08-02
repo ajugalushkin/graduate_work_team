@@ -2,5 +2,5 @@ version: '3.7'
 
 services:
   backend:
-    image: {{ env.ETL_IMAGE }}
+    image: {{ env.ETL_IMAGE_URL }}
     restart: always
