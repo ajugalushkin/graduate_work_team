@@ -24,8 +24,8 @@ jobs:
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
-    # Сборка и загрузка образа
-    - name: Build and Push to YCR
+    # Сборка и пуш образа
+    - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         context: ./etl
@@ -33,29 +33,63 @@ jobs:
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
 
-  # Деплоим на VM
-  deploy:
-    needs:
-      - build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: main
+    # Копирование файлов на VM
+    - name: Copy docker-compose and configs to VM
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        source: "yandex-cloud/docker-compose.yc.yaml,yandex-cloud/user-data.yaml"
+        target: "~/deploy"
 
-      - name: Deploy COI VM
-        id: deploy-coi
-        uses: yc-actions/yc-coi-deploy@v1.0.1
-        env:
-          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
-          YC_VM_SSH: ${{ secrets.SSH_KEY }}
-          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
-        with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          folder-id: ${{ secrets.YC_FOLDER_ID }}
-          vm-name: ${{ secrets.YC_VM_NAME }}
-          vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
-          vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
-          user-data-path: './yandex-cloud/user-data.yaml'
-          docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
+    # Запуск на удаленной VM
+    - name: Deploy and run on VM
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd ~/deploy
+          docker login cr.yandex -u iam --password ${{ secrets.YC_IAM_TOKEN }}
+          docker pull ${{ env.ETL_IMAGE_URL }}
+          docker-compose -f docker-compose.yc.yaml down || true
+          docker-compose -f docker-compose.yc.yaml up -d
+
+
+    # Сборка и загрузка образа
+#    - name: Build and Push to YCR
+#      uses: docker/build-push-action@v3
+#      with:
+#        context: ./etl
+#        file: ./etl/Dockerfile
+#        push: true
+#        tags: ${{ env.ETL_IMAGE_URL }}
+#
+#  # Деплоим на VM
+#  deploy:
+#    needs:
+#      - build
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          ref: main
+#
+#      - name: Deploy COI VM
+#        id: deploy-coi
+#        uses: yc-actions/yc-coi-deploy@v1.0.1
+#        env:
+#          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
+#          YC_VM_SSH: ${{ secrets.SSH_KEY }}
+#          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
+#        with:
+#          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+#          folder-id: ${{ secrets.YC_FOLDER_ID }}
+#          vm-name: ${{ secrets.YC_VM_NAME }}
+#          vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
+#          vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
+#          user-data-path: './yandex-cloud/user-data.yaml'
+#          docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
