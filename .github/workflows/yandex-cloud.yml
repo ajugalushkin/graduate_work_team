@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 # Создаем имена образов
-env:
-  ETL_IMAGE: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
+#env:
+#  ETL_IMAGE: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
 
 jobs:
   build-and-push:
@@ -25,21 +25,21 @@ jobs:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
     # Сборка и загрузка образа
-    - name: Build and Push to YCR
-      uses: docker/build-push-action@v3
-      with:
-        context: ./etl
-        file: ./etl/Dockerfile
-        push: true
-        tags: ${{ env.ETL_IMAGE }}
-#    - name: Build, tag, and push image to Yandex Cloud Container Registry
-#      env:
-#        CR_REGISTRY: ${{ secrets.YC_REGISTRY_ID }}
-#        CR_REPOSITORY: yc-graduate-work-team
-#        IMAGE_TAG: ${{ github.sha }}
-#      run: |
-#        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG .
-#        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
+#    - name: Build and Push to YCR
+#      uses: docker/build-push-action@v3
+#      with:
+#        context: ./etl
+#        file: ./etl/Dockerfile
+#        push: true
+#        tags: ${{ env.ETL_IMAGE }}
+    - name: Build, tag, and push ETL image to Yandex Cloud Container Registry
+      env:
+        CR_REGISTRY: ${{ secrets.YC_REGISTRY_ID }}
+        CR_REPOSITORY: etl
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG ./etl
+        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
 
   # Деплоим на VM
   deploy:
