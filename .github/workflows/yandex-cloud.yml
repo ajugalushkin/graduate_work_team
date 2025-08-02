@@ -5,7 +5,6 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-# Создаем имена образов
 env:
   ETL_IMAGE_URL: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
 
@@ -17,14 +16,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Логинимся в YC
     - name: Login to Yandex Cloud Container Registry
-      id: login-cr
       uses: yc-actions/yc-cr-login@v2
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
-    # Сборка и пуш образа
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
@@ -33,11 +29,7 @@ jobs:
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
 
-    - name: Debug — list files
-      run: ls -laR
-
-    # Копирование файлов на VM
-    - name: Copy docker-compose and configs to VM
+    - name: Copy config files to VM
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -46,20 +38,17 @@ jobs:
         source: "yandex-cloud/"
         target: "~/deploy"
 
-    - name: Debug — list files
-      run: ls -laR
-
-    # Запуск на удаленной VM
-    - name: Deploy and run on VM
+    - name: Deploy and run containers
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
+          set -e
           cd ~/deploy
           if [ ! -f docker-compose.yc.yaml ]; then
-            echo "❌ docker-compose.yc.yaml not found"
+            echo "❌ docker-compose.yc.yaml not found!"
             ls -la
             exit 1
           fi
@@ -67,40 +56,3 @@ jobs:
           docker pull ${{ env.ETL_IMAGE_URL }}
           docker-compose -f docker-compose.yc.yaml down || true
           docker-compose -f docker-compose.yc.yaml up -d
-
-
-    # Сборка и загрузка образа
-#    - name: Build and Push to YCR
-#      uses: docker/build-push-action@v3
-#      with:
-#        context: ./etl
-#        file: ./etl/Dockerfile
-#        push: true
-#        tags: ${{ env.ETL_IMAGE_URL }}
-#
-#  # Деплоим на VM
-#  deploy:
-#    needs:
-#      - build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#        with:
-#          ref: main
-#
-#      - name: Deploy COI VM
-#        id: deploy-coi
-#        uses: yc-actions/yc-coi-deploy@v1.0.1
-#        env:
-#          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
-#          YC_VM_SSH: ${{ secrets.SSH_KEY }}
-#          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
-#        with:
-#          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-#          folder-id: ${{ secrets.YC_FOLDER_ID }}
-#          vm-name: ${{ secrets.YC_VM_NAME }}
-#          vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
-#          vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
-#          user-data-path: './yandex-cloud/user-data.yaml'
-#          docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
