@@ -1,8 +1,8 @@
 #cloud-config
-packages:
-  - docker-compose
-
-runcmd:
-  - cd /home/yc-user/repo
-  - echo "ETL_IMAGE=${ETL_IMAGE}" >> .env
-  - docker-compose -f yandex-cloud/docker-compose.yc.yaml --env-file .env up -d
+users:
+  - name: {{ env.YC_VM_USERNAME }}
+    groups: sudo
+    shell: /bin/bash
+    sudo: [ 'ALL=(ALL) NOPASSWD:ALL' ]
+    ssh_authorized_keys:
+      - {{ env.YC_VM_SSH }}

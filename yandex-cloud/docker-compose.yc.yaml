@@ -1,6 +1,6 @@
-version: '3.9'
+version: '3.7'
 
 services:
-  etl:
-    image: ${ETL_IMAGE}
+  backend:
+    image: {{ env.ETL_IMAGE }}
     restart: always

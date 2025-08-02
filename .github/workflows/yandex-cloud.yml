@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+# Создаем имена образов
 env:
   ETL_IMAGE: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
 
@@ -16,6 +17,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    # Логинимся в YC
     - name: Login to Yandex Cloud Container Registry
       id: login-cr
       uses: yc-actions/yc-cr-login@v1
@@ -30,7 +32,16 @@ jobs:
         file: ./etl/Dockerfile
         push: true
         tags: ${{ env.ETL_IMAGE }}
+#    - name: Build, tag, and push image to Yandex Cloud Container Registry
+#      env:
+#        CR_REGISTRY: ${{ secrets.YC_REGISTRY_ID }}
+#        CR_REPOSITORY: yc-graduate-work-team
+#        IMAGE_TAG: ${{ github.sha }}
+#      run: |
+#        docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG .
+#        docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
 
+  # Деплоим на VM
   deploy:
     runs-on: ubuntu-latest
     needs: [build-and-push]
