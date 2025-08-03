@@ -10,7 +10,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - alice
-  backend:
+
+  etl:
     image: ${ETL_IMAGE_URL}
     container_name: etl
     restart: always

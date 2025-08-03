@@ -73,6 +73,8 @@ jobs:
             export ETL_IMAGE_URL=${{ env.ETL_IMAGE_URL }}
             export TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}
             
+            export ALICE_IMAGE_URL=${{ env.ALICE_IMAGE_URL }}
+            
             cd /home/${{ secrets.SSH_USER }}/app/deployments
             
             docker login cr.yandex -u oauth -p ${{ secrets.YC_OAUTH_TOKEN }}
