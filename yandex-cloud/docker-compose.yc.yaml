@@ -4,3 +4,15 @@ services:
   backend:
     image: ${ETL_IMAGE_URL}
     restart: always
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.4
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
