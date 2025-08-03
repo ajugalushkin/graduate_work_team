@@ -2,7 +2,7 @@ name: Deploy to Yandex Cloud
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -13,41 +13,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Login to Yandex Cloud Container Registry
-      uses: yc-actions/yc-cr-login@v2
-      with:
-        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      - name: Install Yandex CLI
+        run: |
+          curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v3
-      with:
-        context: ./etl
-        file: ./etl/Dockerfile
-        push: true
-        tags: ${{ env.ETL_IMAGE_URL }}
+      - name: Setup service account key file
+        run: echo "${{ secrets.YC_SA_KEY_JSON }}" > authorized_key.json
 
-    - name: Copy config files to VM
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        source: "yandex-cloud/"
-        target: "~/deploy"
+      - name: Docker login to YCR
+        run: |
+          TOKEN=$(yc iam create-token --service-account-key authorized_key.json)
+          docker login cr.yandex -u oauth -p $TOKEN
 
-    - name: Deploy and run containers
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          set -e
-          cd ~/deploy
-          docker login cr.yandex -u iam --password ${{ secrets.YC_IAM_TOKEN }}
-          docker pull ${{ env.ETL_IMAGE_URL }}
-          docker-compose -f docker-compose.yc.yaml down || true
-          docker-compose -f docker-compose.yc.yaml up -d
+      - name: Build and push Docker image to YCR
+        uses: docker/build-push-action@v3
+        with:
+          context: ./etl
+          file: ./etl/Dockerfile
+          push: true
+          tags: ${{ env.ETL_IMAGE_URL }}
+
+      - name: Copy docker-compose and configs to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "yandex-cloud/docker-compose.yc.yaml,yandex-cloud/user-data.yaml"
+          target: "~/deploy"
+
+      - name: Deploy and run on remote VM
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/deploy
+            docker login cr.yandex -u oauth -p $(yc iam create-token --service-account-key ~/authorized_key.json)
+            docker pull ${{ env.ETL_IMAGE_URL }}
+            docker compose -f docker-compose.yc.yaml down || true
+            docker compose -f docker-compose.yc.yaml up -d
