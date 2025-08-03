@@ -63,9 +63,6 @@ jobs:
           script: |
             export ETL_IMAGE_URL=${{ env.ETL_IMAGE_URL }}
             export TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}
-            export TMDB_LANGUAGE_CODE=${{ secrets.TMDB_LANGUAGE_CODE }}
-            export ELASTICSEARCH_URL=http://elasticsearch:9200
-            export ELASTICSEARCH_INDEX=movies
             
             cd /home/${{ secrets.SSH_USER }}/app
             

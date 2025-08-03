@@ -3,7 +3,14 @@ version: '3.7'
 services:
   backend:
     image: ${ETL_IMAGE_URL}
+    container_name: etl
     restart: always
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TMDB_LANGUAGE_CODE=ru-RU
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=movies
+
 
   elasticsearch:
     image: docker.io/bitnami/elasticsearch:9
