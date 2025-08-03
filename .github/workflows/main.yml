@@ -68,6 +68,9 @@ jobs:
             
             docker login cr.yandex -u oauth -p ${{ secrets.YC_OAUTH_TOKEN }}
             
+            docker stop $(docker ps -a -q)
+            docker rm $(docker ps -a -q)
+            
             docker compose -f docker-compose.yc.yaml down
             docker compose -f docker-compose.yc.yaml pull
             docker compose -f docker-compose.yc.yaml up -d
