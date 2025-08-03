@@ -61,7 +61,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/${{ secrets.SSH_USER }}/app
+            cd /home/${{ secrets.SSH_USER }}/app/yandex-cloud
             docker compose -f docker-compose.yc.yaml down
             docker compose -f docker-compose.yc.yaml pull
             docker compose -f docker-compose.yc.yaml up -d
