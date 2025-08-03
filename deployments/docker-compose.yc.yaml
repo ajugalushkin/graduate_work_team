@@ -11,7 +11,7 @@ services:
     depends_on:
       - alice
 
-  etl:
+  backend:
     image: ${ETL_IMAGE_URL}
     container_name: etl
     restart: always
