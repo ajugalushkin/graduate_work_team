@@ -32,6 +32,14 @@ jobs:
         file: ./etl/Dockerfile
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
+    # Сборка и загрузка образа работы с Алисой
+    - name: Build and Push to YCR
+      uses: docker/build-push-action@v3
+      with:
+        context: ./etl
+        file: ./alice/Dockerfile
+        push: true
+        tags: ${{ env.ALICE_IMAGE_URL }}
 
   # Деплоим на VM
   deploy:
