@@ -41,8 +41,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      # Копирование файлов на VM
+      - name: Copy files to VM
+        uses: appleboy/scp-action@v0.1.7
         with:
-          ref: main
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: "./yandex-cloud/*"
+          target: "/home/${{ secrets.SSH_USER }}/app"
+
+      # Выполнение команд на VM
+      - name: Execute remote commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/app
+            docker compose -f docker-compose.yc.yaml down
+            docker compose -f docker-compose.yc.yaml pull
+            docker compose -f docker-compose.yc.yaml up -d
 
       - name: Deploy COI VM
         id: deploy-coi
