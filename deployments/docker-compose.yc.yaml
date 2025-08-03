@@ -11,7 +11,7 @@ services:
     depends_on:
       - alice
 
-  backend:
+  etl:
     image: ${ETL_IMAGE_URL}
     container_name: etl
     restart: always
@@ -23,7 +23,7 @@ services:
 
   alice:
     image: ${ALICE_IMAGE_URL}
-    container_name: etl
+    container_name: alice
     restart: always
     environment:
       - TMDB_API_KEY=${TMDB_API_KEY}
