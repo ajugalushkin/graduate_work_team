@@ -1,10 +1,10 @@
 import logging
-from contextlib import asynccontextmanager
 from logging.config import dictConfig
 
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
+from src.api.urls import router
 from src.core.logger import LOGGING
 
 dictConfig(LOGGING)
@@ -17,6 +17,8 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
 )
+
+app.include_router(router, prefix="/api")
 
 
 @app.get("/health")

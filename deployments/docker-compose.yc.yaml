@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - alice
+  backend:
+    image: ${ETL_IMAGE_URL}
+    container_name: etl
+    restart: always
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TMDB_LANGUAGE_CODE=ru-RU
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=movies
+
+  alice:
+    image: ${ALICE_IMAGE_URL}
+    container_name: etl
+    restart: always
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TMDB_LANGUAGE_CODE=ru-RU
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=movies
+
+  elasticsearch:
+    image: docker.io/bitnami/elasticsearch:9
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
