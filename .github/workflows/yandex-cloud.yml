@@ -61,6 +61,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            export ETL_IMAGE_URL=${{ env.ETL_IMAGE_URL }}
             cd /home/${{ secrets.SSH_USER }}/app/yandex-cloud
             docker compose -f docker-compose.yc.yaml down
             docker compose -f docker-compose.yc.yaml pull
