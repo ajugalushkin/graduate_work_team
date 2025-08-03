@@ -1,8 +1,0 @@
-#cloud-config
-users:
-  - name: ${YC_VM_USERNAME}
-    groups: sudo
-    shell: /bin/bash
-    sudo: [ 'ALL=(ALL) NOPASSWD:ALL' ]
-    ssh_authorized_keys:
-      - ${YC_VM_SSH}
