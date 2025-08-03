@@ -42,57 +42,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-#      # Копирование файлов на VM
-#      - name: Copy files to VM
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: ${{ secrets.SSH_HOST }}
-#          username: ${{ secrets.SSH_USER }}
-#          key: ${{ secrets.SSH_KEY }}
-#          port: 22
-#          source: "./yandex-cloud/*"
-#          target: "/home/${{ secrets.SSH_USER }}/app"
-#
-#      # Выполнение команд на VM
-#      - name: Execute remote commands
-#        uses: appleboy/ssh-action@v1.2.0
-#        with:
-#          host: ${{ secrets.SSH_HOST }}
-#          username: ${{ secrets.SSH_USER }}
-#          key: ${{ secrets.SSH_KEY }}
-#          script: |
-#            cd /home/${{ secrets.SSH_USER }}/app/yandex-cloud
-#            docker compose -f docker-compose.yc.yaml down
-#            docker compose -f docker-compose.yc.yaml pull
-#            docker compose -f docker-compose.yc.yaml up -d
-
-      # Установка envsubst
-      - name: Install envsubst
-        run: sudo apt-get install -y gettext-base
-
-      # Предобработка файлов
-      - name: Preprocess files
-        run: |
-          mkdir -p processed
-          envsubst < ./yandex-cloud/docker-compose.yc.yaml > ./processed/docker-compose.yaml
-          envsubst < ./yandex-cloud/user-data.yaml > ./processed/user-data.yaml
-        env:
-          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
-          YC_VM_SSH: ${{ secrets.SSH_KEY }}
-          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
-
-      - name: Deploy COI VM
-        id: deploy-coi
-        uses: yc-actions/yc-coi-deploy@v1.0.1
-        env:
-          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
-          YC_VM_SSH: ${{ secrets.SSH_KEY }}
-          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
+      # Копирование файлов на VM
+      - name: Copy files to VM
+        uses: appleboy/scp-action@v0.1.7
         with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          folder-id: ${{ secrets.YC_FOLDER_ID }}
-          vm-name: ${{ secrets.YC_VM_NAME }}
-          vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
-          vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
-          user-data-path: './processed/user-data.yaml'
-          docker-compose-path: './processed/docker-compose.yaml'
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: "./yandex-cloud/*"
+          target: "/home/${{ secrets.SSH_USER }}/app"
+
+      # Выполнение команд на VM
+      - name: Execute remote commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/app/yandex-cloud
+            docker compose -f docker-compose.yc.yaml down
+            docker compose -f docker-compose.yc.yaml pull
+            docker compose -f docker-compose.yc.yaml up -d
+
+#      - name: Deploy COI VM
+#        id: deploy-coi
+#        uses: yc-actions/yc-coi-deploy@v1.0.1
+#        env:
+#          ETL_IMAGE_URL: ${{ env.ETL_IMAGE_URL }}
+#          YC_VM_SSH: ${{ secrets.SSH_KEY }}
+#          YC_VM_USERNAME: ${{ secrets.SSH_USER }}
+#        with:
+#          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+#          folder-id: ${{ secrets.YC_FOLDER_ID }}
+#          vm-name: ${{ secrets.YC_VM_NAME }}
+#          vm-service-account-id: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
+#          vm-subnet-id: ${{ secrets.YC_SUBNET_ID }}
+#          user-data-path: './yandex-cloud/user-data.yaml'
+#          docker-compose-path: './yandex-cloud/docker-compose.yc.yaml'
