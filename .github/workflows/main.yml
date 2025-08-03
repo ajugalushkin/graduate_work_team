@@ -8,6 +8,7 @@ on:
 # Создаем имена образов
 env:
   ETL_IMAGE_URL: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/etl:${{ github.sha }}
+  ALICE_IMAGE_URL: cr.yandex/${{ secrets.YC_REGISTRY_ID }}/alice:${{ github.sha }}
 
 jobs:
   build:
