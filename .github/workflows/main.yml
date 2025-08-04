@@ -52,12 +52,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Debug — покажи структуру проекта
+      - name: Prepare files for deploy
         run: |
-          pwd
-          ls -la
-          ls -la ./nginx
-          ls -la ./deployments
+          mkdir -p temp_upload
+          cp ./deployments/docker-compose.yc.yaml temp_upload/
+          cp ./nginx/nginx.conf temp_upload/
 
       # Копирование файлов на VM
       - name: Copy files to VM
@@ -67,7 +66,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: "./deployments/docker-compose.yc.yaml ./nginx/nginx.conf"
+          source: "temp_upload"
           target: "/home/${{ secrets.SSH_USER }}/app"
 
       # Выполнение команд на VM
