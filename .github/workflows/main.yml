@@ -61,6 +61,17 @@ jobs:
           source: "./deployments/docker-compose.yc.yaml"
           target: "/home/${{ secrets.SSH_USER }}/app"
 
+      # Копирование файлов на VM
+      - name: Copy files to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: "./nginx/nginx.conf"
+          target: "/etc/nginx/nginx.conf"
+
       # Выполнение команд на VM
       - name: Execute remote commands
         uses: appleboy/ssh-action@v1.2.0
