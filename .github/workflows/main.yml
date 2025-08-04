@@ -52,6 +52,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Check file before SCP
+        run: ls -l ./nginx/nginx.conf
+
+      - name: Check file before SCP
+        run: ls -l ./deployments/docker-compose.yc.yaml
+
       # Копирование файлов на VM
       - name: Copy files to VM
         uses: appleboy/scp-action@v0.1.7
