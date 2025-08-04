@@ -72,7 +72,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           source: "./nginx/nginx.conf"
-          target: "/home/${{ secrets.SSH_USER }}/app"
+          target: "/home/app"
 
       # Выполнение команд на VM
       - name: Execute remote commands
