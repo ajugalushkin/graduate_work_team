@@ -69,7 +69,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: "./nginx/nginx.conf"
+          source: "/etc/nginx/nginx.conf"
           target: "/etc/nginx/nginx.conf"
 
       # Выполнение команд на VM
