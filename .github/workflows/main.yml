@@ -67,9 +67,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: |
-            ./deployments/docker-compose.yc.yaml
-            ./nginx/nginx.conf
+          source: "./deployments/docker-compose.yc.yaml ./nginx/nginx.conf"
           target: "/home/${{ secrets.SSH_USER }}/app"
 
       # Выполнение команд на VM
