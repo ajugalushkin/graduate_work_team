@@ -25,7 +25,7 @@ jobs:
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
-    # Сборка и загрузка образа
+    # Сборка и загрузка образа ETL
     - name: Build and Push to YCR
       uses: docker/build-push-action@v3
       with:
@@ -33,6 +33,7 @@ jobs:
         file: ./etl/Dockerfile
         push: true
         tags: ${{ env.ETL_IMAGE_URL }}
+
     # Сборка и загрузка образа работы с Алисой
     - name: Build and Push to YCR
       uses: docker/build-push-action@v3
