@@ -55,7 +55,7 @@ jobs:
       - name: Prepare files for deploy
         run: |
           mkdir -p temp_upload
-          cp ./deployments/docker-compose.yc.yaml temp_upload/
+          cp ./deployments/docker-compose.yc.yaml /
 
       # Копирование файлов на VM
       - name: Copy files to VM
