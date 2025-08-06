@@ -56,7 +56,7 @@ jobs:
         run: |
           mkdir -p temp_upload
           cp ./deployments/docker-compose.yc.yaml temp_upload/
-          cp ./nginx/nginx.conf temp_upload/nginx/
+          cp ./nginx/nginx.conf temp_upload/
 
       # Копирование файлов на VM
       - name: Copy files to VM
