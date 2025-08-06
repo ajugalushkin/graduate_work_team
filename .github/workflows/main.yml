@@ -55,7 +55,7 @@ jobs:
       - name: Prepare files for deploy
         run: |
           mkdir -p temp_upload
-          cp ./deployments/docker-compose.yc.yaml /
+          cp ./deployments/docker-compose.yc.yaml temp_upload/
 
       # Копирование файлов на VM
       - name: Copy files to VM
@@ -82,7 +82,7 @@ jobs:
             
             export ALICE_IMAGE_URL=${{ env.ALICE_IMAGE_URL }}
             
-            cd /home/${{ secrets.SSH_USER }}/app/deployments
+            cd /home/${{ secrets.SSH_USER }}/app/deployments/temp_upload
             
             docker login cr.yandex -u oauth -p ${{ secrets.YC_OAUTH_TOKEN }}
             
