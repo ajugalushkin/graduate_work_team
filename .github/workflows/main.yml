@@ -56,7 +56,7 @@ jobs:
         run: |
           mkdir -p temp_upload
           cp ./deployments/docker-compose.yc.yaml temp_upload/
-          cp ./nginx/nginx.conf temp_upload/
+          cp ./nginx/nginx.conf temp_upload/nginx/
 
       # Копирование файлов на VM
       - name: Copy files to VM
@@ -77,6 +77,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            export SSH_USER=${{ secrets.SSH_USER }}
             export ETL_IMAGE_URL=${{ env.ETL_IMAGE_URL }}
             export TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}
             
