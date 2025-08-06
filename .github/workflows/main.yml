@@ -82,7 +82,7 @@ jobs:
             
             export ALICE_IMAGE_URL=${{ env.ALICE_IMAGE_URL }}
             
-            cd /home/${{ secrets.SSH_USER }}/app/deployments/temp_upload/
+            cd /home/${{ secrets.SSH_USER }}/app/temp_upload/
             
             docker login cr.yandex -u oauth -p ${{ secrets.YC_OAUTH_TOKEN }}
             
