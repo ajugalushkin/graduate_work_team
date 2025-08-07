@@ -51,7 +51,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - name: Reload NGINX config
+        run: |
+          sudo ln -fs ./nginx/nginx.conf /etc/nginx/nginx.conf
+          sudo nginx -t
+          sudo service nginx reload
       - name: Prepare files for deploy
         run: |
           mkdir -p temp_upload
