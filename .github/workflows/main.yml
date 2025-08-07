@@ -51,15 +51,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Reload NGINX config
-        run: |
-          sudo ln -fs ./nginx/nginx.conf /etc/nginx/nginx.conf
-          sudo nginx -t
-          sudo service nginx reload
       - name: Prepare files for deploy
         run: |
           mkdir -p temp_upload
           cp ./deployments/docker-compose.yc.yaml temp_upload/
+          cp ./nginx/nginx.conf temp_upload/
 
       # Копирование файлов на VM
       - name: Copy files to VM
@@ -96,3 +92,6 @@ jobs:
             docker compose -f docker-compose.yc.yaml down
             docker compose -f docker-compose.yc.yaml pull
             docker compose -f docker-compose.yc.yaml up -d
+            sudo ln -fs /home/${{ secrets.SSH_USER }}/app/temp_upload/nginx.conf /etc/nginx/nginx.conf
+            sudo nginx -t
+            sudo service nginx reload
