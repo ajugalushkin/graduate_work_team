@@ -25,6 +25,8 @@ services:
     image: ${ALICE_IMAGE_URL}
     container_name: alice
     restart: always
+    ports:
+      - "127.0.0.1:8000:8000"
 
   elasticsearch:
     image: docker.io/bitnami/elasticsearch:9
