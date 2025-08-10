@@ -55,7 +55,8 @@ services:
     container_name: loader-movies
     depends_on:
       - elasticsearch
-    restart: "no"
+    networks:
+      - esnet
 
 networks:
   esnet:

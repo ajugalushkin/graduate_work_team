@@ -12,7 +12,6 @@ def load_dump():
 
     if not os.path.exists(settings.dump_file):
         print(f"❌ Файл дампа не найден: {settings.dump_file}")
-        print(f"📁 Содержимое / {os.listdir('/data')}")
         exit(1)
 
     try:
