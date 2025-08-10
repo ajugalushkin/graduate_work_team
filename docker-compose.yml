@@ -16,22 +16,35 @@ services:
 #    depends_on:
 #      - alice
 
+#  elasticsearch:
+#    image: docker.io/bitnami/elasticsearch:9
+#    container_name: elasticsearch
+#    environment:
+#      - discovery.type=single-node
+#      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+#      - xpack.security.enabled=false
+#    ports:
+#      - "9200:9200"
+#    volumes:
+#      - elasticdata:/usr/share/elasticsearch/data
+#    healthcheck:
+#      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+#      interval: 10s
+#      timeout: 10s
+#      retries: 12
+#    networks:
+#      - esnet
   elasticsearch:
-    image: docker.io/bitnami/elasticsearch:9
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.4
     container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-      - xpack.security.enabled=false
     ports:
       - "9200:9200"
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 12
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     networks:
       - esnet
 
@@ -41,11 +54,7 @@ services:
       dockerfile: Dockerfile
     container_name: loader-movies
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-    environment:
-      - ELASTIC_URL=http://elasticsearch:9200
-      - INDEX_NAME=movies
+      - elasticsearch
     restart: "no"
 
 networks:
