@@ -13,4 +13,4 @@ COPY src/dump/movies.json /data/movies.json
 # Проверим, что файлы есть
 RUN ls -la
 
-CMD ["python", "load_dump.py"]
+CMD ["python", "main.py"]
