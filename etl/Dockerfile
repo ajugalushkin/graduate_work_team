@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install requirements
-COPY requirements.txt .
+COPY src/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
