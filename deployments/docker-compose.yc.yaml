@@ -14,12 +14,11 @@ services:
   etl:
     image: ${ETL_IMAGE_URL}
     container_name: etl
-    restart: always
+    restart: no
     environment:
-      - TMDB_API_KEY=${TMDB_API_KEY}
-      - TMDB_LANGUAGE_CODE=ru-RU
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - ELASTICSEARCH_INDEX=movies
+      - ELASTIC_URL=http://elasticsearch:9200
+      - ELASTIC_INDEX=movies
+      - DUMP_FILE=/app/src/dump/movies.json
 
   alice:
     image: ${ALICE_IMAGE_URL}

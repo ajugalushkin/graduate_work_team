@@ -2,11 +2,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Config(BaseSettings):
-    tmdb_api_key: str
-    tmdb_language_code: str
-
-    elasticsearch_url: str
-    elasticsearch_index: str
+    elastic_url: str
+    elastic_index: str
+    dump_file: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

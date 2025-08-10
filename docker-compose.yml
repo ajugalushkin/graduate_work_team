@@ -30,11 +30,11 @@ services:
     networks:
       - esnet
 
-  loader:
-    build: etl/
-    container_name: etl_loader
-    env_file:
-      - .env
+  data-loader:
+    build:
+      context: etl
+      dockerfile: Dockerfile
+    container_name: loader-movies
     depends_on:
       - elasticsearch
     networks:

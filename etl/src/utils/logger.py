@@ -1,7 +1,7 @@
 import logging
 import sys
 
-def setup_logger(name: str = "tmdb_loader") -> logging.Logger:
+def setup_logger(name: str = "etl_loader") -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
 
