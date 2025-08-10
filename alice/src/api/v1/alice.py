@@ -12,7 +12,10 @@ async def webhook(request: Request):
     logger.info(request)
     logger.info(await request.json())
     request = await request.json()
-    if request["request"]["type"] == "Что ты умеешь":
+    if (
+        request["request"]["type"] == "Что ты умеешь"
+        or request["request"]["type"] == "Помощь"
+    ):
         return {
             "response": {
                 "text": "Я умею искать режиссёра фильма. Спросите «Кто режиссёр фильма Star wars»",
