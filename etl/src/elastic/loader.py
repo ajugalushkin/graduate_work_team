@@ -22,13 +22,24 @@ def load_dump():
         print(f"❌ Ошибка чтения JSON: {e}")
         exit(1)
 
-    actions = []
-    for movie in movies:
-        action = {"index": {"_index": settings.elastic_index, "_id": movie["id"]}}
-        actions.append(action)
-        actions.append(movie)
+    bulk_data = []
 
-    index_bulk_movies(es, actions)
+    for movie in movies:
+        try:
+            bulk_data.append({
+                "index": {
+                    "_index": "movies",
+                    "_id": movie["id"]
+                }
+            })
+            bulk_data.append(movie)
+            print(f"Загружено {len(movie)} записей")
+        except Exception as e:
+            print(f"Ошибка загрузки фильма {movie["id"]}: {e}")
+
+        time.sleep(0.2)
+
+    index_bulk_movies(es, bulk_data)
 
     print("🎉 Загрузка завершена.")
     time.sleep(2)
