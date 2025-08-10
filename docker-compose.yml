@@ -1,44 +1,52 @@
 services:
-  alice:
-    build:
-      context: ./alice
-    container_name: alice_api
-    restart: unless-stopped
-    init: true
-
-  web:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - alice
+#  alice:
+#    build:
+#      context: ./alice
+#    container_name: alice_api
+#    restart: unless-stopped
+#    init: true
+#
+#  web:
+#    image: nginx:latest
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+#    depends_on:
+#      - alice
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.4
+    image: docker.io/bitnami/elasticsearch:9
     container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
     ports:
       - "9200:9200"
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
     networks:
       - esnet
 
-  loader:
-    build: etl/
-    container_name: etl_loader
-    env_file:
-      - .env
+  data-loader:
+    build:
+      context: etl
+      dockerfile: Dockerfile
+    container_name: loader-movies
     depends_on:
-      - elasticsearch
-    networks:
-      - esnet
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ELASTIC_URL=http://elasticsearch:9200
+      - INDEX_NAME=movies
+    restart: "no"
 
 networks:
   esnet:

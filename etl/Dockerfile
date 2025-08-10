@@ -1,24 +1,16 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
-ENV PYTHONPATH=/app/src
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on
+# Установка зависимостей
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+# Копируем скрипты
+COPY src/*.py .
+COPY src/dump/movies.json /data/movies.json
 
-# Upgrade pip and install requirements
-COPY src/requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+# Проверим, что файлы есть
+RUN ls -la
 
-# Copy project
-COPY . .
-
-CMD ["python", "src/main.py"]
+CMD ["python", "load_dump.py"]
