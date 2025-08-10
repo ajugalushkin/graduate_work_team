@@ -1,33 +1,14 @@
 import os
 import json
 import time
-import requests
-from elasticsearch import Elasticsearch
 
+from etl.src.core.config import settings
 from etl.src.elastic.client import get_es_client
 from etl.src.elastic.schema import MOVIE_INDEX_SCHEMA
 
 print("✅ main.py: Скрипт запущен")
-
-ELASTIC_URL = os.getenv("ELASTIC_URL", "http://elasticsearch:9200")
-INDEX_NAME = os.getenv("INDEX_NAME", "movies")
-DUMP_FILE = "/data/movies.json"  # 🔥 Важно: файл монтируется в /data
-
-print(f"🌍 Подключение к: {ELASTIC_URL}")
-print(f"📂 Файл дампа: {DUMP_FILE}")
-
-def create_index(es):
-    try:
-        if es.indices.exists(index=INDEX_NAME):
-            print(f"ℹ️ Индекс '{INDEX_NAME}' уже существует")
-            return
-
-        es.indices.create(index=INDEX_NAME, body=MOVIE_INDEX_SCHEMA)
-        print(f"✅ Индекс '{INDEX_NAME}' создан")
-    except Exception as e:
-        print(f"❌ Ошибка создания индекса: {e}")
-        exit(1)
-
+print(f"🌍 Подключение к: {settings.elastic_url}")
+print(f"📂 Файл дампа: {settings.dump_file}")
 
 def load_dump(es):
     if not os.path.exists(DUMP_FILE):
