@@ -15,9 +15,21 @@ async def webhook(request: Request):
     if request["request"]["type"] == "Что ты умеешь":
         return {
             "response": {
-                "text": "Я умею искать режиссёра фильма. Спроси кто режиссёр фильма Star wars",
-                "tts": "Я умею искать режиссёра фильма. Спроси кто режиссёр фильма Star wars",
+                "text": "Я умею искать режиссёра фильма. Спросите «Кто режиссёр фильма Star wars»",
+                "tts": "Я умею искать режиссёра фильма. Спросите «Кто режиссёр фильма Star wars»",
                 "end_session": False
+            },
+            "application_state": {
+                "value": 37
+            },
+            "version": "1.0"
+        }
+    elif "Запусти навык «кто режиссёр фильма»" in request["request"]["type"].lower():
+        return {
+            "response": {
+                "text": "Здравствуйте! Я умею искать режиссёра фильма. Спросите: «Кто режиссёр фильма Star wars?»",
+                "tts": "Здравствуйте! Я умею искать режиссёра фильма. Спросите: «Кто режиссёр фильма Star wars?»",
+                "end_session": True
             },
             "application_state": {
                 "value": 37
