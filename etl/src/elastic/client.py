@@ -12,11 +12,11 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 def get_es_client(retries=10, delay=10) -> Elasticsearch:
-    logger.info(f"Подключение к Elasticsearch: {settings.elasticsearch_url}")
+    logger.info(f"Подключение к Elasticsearch: {settings.elastic_url}")
 
     for attempt in range(retries):
         try:
-            client = Elasticsearch(settings.elasticsearch_url)
+            client = Elasticsearch(settings.elastic_url)
 
             if client.ping():
                 logger.info("Успешное подключение к Elasticsearch")

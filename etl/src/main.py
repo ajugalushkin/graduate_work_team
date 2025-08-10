@@ -2,8 +2,8 @@ import os
 import json
 import time
 
-from etl.src.core.config import settings
-from etl.src.elastic.client import get_es_client, create_index_if_not_exists, index_bulk_movies
+from core.config import settings
+from elastic.client import get_es_client, create_index_if_not_exists, index_bulk_movies
 
 print("✅ main.py: Скрипт запущен")
 print(f"🌍 Подключение к: {settings.elastic_url}")
