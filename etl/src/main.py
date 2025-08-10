@@ -3,9 +3,11 @@ import json
 import time
 import requests
 from elasticsearch import Elasticsearch
-from elastic_schema import MOVIE_INDEX_SCHEMA
 
-print("✅ load_dump.py: Скрипт запущен")
+from etl.src.elastic.client import get_es_client
+from etl.src.elastic.schema import MOVIE_INDEX_SCHEMA
+
+print("✅ main.py: Скрипт запущен")
 
 ELASTIC_URL = os.getenv("ELASTIC_URL", "http://elasticsearch:9200")
 INDEX_NAME = os.getenv("INDEX_NAME", "movies")
@@ -13,26 +15,6 @@ DUMP_FILE = "/data/movies.json"  # 🔥 Важно: файл монтирует�
 
 print(f"🌍 Подключение к: {ELASTIC_URL}")
 print(f"📂 Файл дампа: {DUMP_FILE}")
-
-
-def wait_for_es():
-    print("⏳ Ожидание Elasticsearch...")
-    for _ in range(60):  # максимум 5 минут
-        try:
-            response = requests.get(ELASTIC_URL, timeout=5)
-            if response.status_code == 200:
-                print("✅ Elasticsearch доступен")
-                return
-        except requests.ConnectionError:
-            print("💤 Не могу подключиться к ES, жду...")
-        except Exception as e:
-            print(f"❌ Ошибка подключения: {e}")
-
-        time.sleep(10)
-
-    print("❌ Не удалось подключиться к Elasticsearch")
-    exit(1)
-
 
 def create_index(es):
     try:
@@ -79,9 +61,9 @@ def load_dump(es):
 
 
 if __name__ == "__main__":
-    wait_for_es()
-    es = Elasticsearch(ELASTIC_URL)
-    create_index(es)
+    es=get_es_client()
+
     load_dump(es)
+
     print("🎉 Загрузка завершена.")
     time.sleep(2)
