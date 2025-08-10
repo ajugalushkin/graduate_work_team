@@ -78,7 +78,6 @@ jobs:
           script: |
             export SSH_USER=${{ secrets.SSH_USER }}
             export ETL_IMAGE_URL=${{ env.ETL_IMAGE_URL }}
-            export TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}
             
             export ALICE_IMAGE_URL=${{ env.ALICE_IMAGE_URL }}
             
