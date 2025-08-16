@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan setup and teardown."""
     # Setup
     settings = get_settings()
-    setup_logging(log_level=settings.log_level, log_name=settings.module_name)
+    setup_logging(log_level=settings.log_level)
     container = Container()
 
     Container.init_config_from_settings(container, settings)
