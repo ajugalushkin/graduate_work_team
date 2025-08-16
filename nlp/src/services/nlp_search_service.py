@@ -43,8 +43,19 @@ class NLPSearchService:
             search_data["intent"] = "writers_names"
         elif search_data.get("intent") == "actors":
             search_data["intent"] = "actors_names"
+        elif search_data.get("intent") == "rating":
+            search_data["intent"] = "imdb_rating"
+        elif search_data.get("intent") == "genre":
+            search_data["intent"] = "genres"
+        
+        if search_data["intent"] == "count_movies":
+            return await self.search_service.search_count_by_query(
+                keyword=search_data.get("keyword"),
+                keyword_field=search_data.get("category"),
+                search_field=search_data.get("intent"),
+            )
 
-        return await self.search_service.search_by_query(
+        return await self.search_service.search_one_by_query(
             keyword=search_data.get("keyword"),
             keyword_field=search_data.get("category"),
             search_field=search_data.get("intent"),
