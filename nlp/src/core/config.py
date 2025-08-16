@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     environment: str = Field(default="production")
     log_level: str = "INFO"
+    
+    # Patterns
+    patterns_path: str = "patterns.json"
 
     # Elasticsearch
     elasticsearch_host: str = "elasticsearch"

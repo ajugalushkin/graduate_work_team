@@ -27,4 +27,25 @@ class NLPSearchService:
         return await self.nlp_service.parse_query(query=query)
     
     async def search_by_pattern(self, query: str) -> str:
-        return await self.nlp_service.parse_pattern(query=query) 
+        search_data = await self.nlp_service.parse_pattern(query=query)
+        
+        if not search_data:
+            return None
+        
+        if search_data.get("category") == "movie":
+            search_data["category"] = "title"
+        elif search_data.get("category") == "author":
+            search_data["category"] = "writers_names"
+
+        if search_data.get("intent") == "movie":
+            search_data["intent"] = "title"
+        elif search_data.get("intent") == "author":
+            search_data["intent"] = "writers_names"
+        elif search_data.get("intent") == "actors":
+            search_data["intent"] = "actors_names"
+
+        return await self.search_service.search_by_query(
+            keyword=search_data.get("keyword"),
+            keyword_field=search_data.get("category"),
+            search_field=search_data.get("intent"),
+        ) 

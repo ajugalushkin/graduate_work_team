@@ -21,7 +21,9 @@ class Container(containers.DeclarativeContainer):
         """Initialize configuration from settings."""
         container.config.set("environment", settings.environment)
         container.config.set("log_level", settings.log_level)
-        
+
+        container.config.set("patterns_path", settings.patterns_path)
+
         container.config.set(
             "elasticsearch_host", str(settings.elasticsearch_host)
         )
@@ -50,7 +52,8 @@ class Container(containers.DeclarativeContainer):
     )
 
     nlp_service = providers.Singleton(
-        NLPService
+        NLPService,
+        config.patterns_path
     )
 
     nlp_search_service = providers.Factory(

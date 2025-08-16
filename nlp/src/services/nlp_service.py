@@ -1,4 +1,5 @@
 import logging
+import json
 import re
 
 from natasha import (
@@ -12,24 +13,30 @@ from natasha import (
 
 
 class NLPService:
-    def __init__(self):
+    def __init__(self, patterns_path: str):
+        self.patterns_path = patterns_path
         self.genres: list[str] | None = None
         self.segmenter = Segmenter()
         self.morph_vocab = MorphVocab()
         self.emb = NewsEmbedding()
         self.morph_tagger = NewsMorphTagger(self.emb)
         self.ner_tagger = NewsNERTagger(self.emb)
-        self.compiled_patterns = {
-            "movie-author": re.compile(r".*кто автор фильма\s+(.+)\?", re.IGNORECASE),
-            "author-count_movies": re.compile(
-                r".*сколько фильмов выпустил автор\s+(.+)\?", re.IGNORECASE
-            ),
-            "movie-duration": re.compile(r".*сколько длится фильм\s+(.+)\?", re.IGNORECASE),
-            "movie-rating": re.compile(r".*какой рейтинг у фильма\s+(.+)\?", re.IGNORECASE),
-            "movie-genre": re.compile(
-                r".*к какому жанру относится фильм\s+(.+)\?", re.IGNORECASE
-            ),
-        }
+        self.compiled_patterns = self._load_and_compile_patterns()
+
+    def _load_and_compile_patterns(self) -> dict:
+        with open(self.patterns_path, "r", encoding="utf-8") as f:
+            raw_patterns = json.load(f)
+
+        compiled_patterns = {}
+
+        for category, intents in raw_patterns.items():
+            compiled_patterns[category] = {}
+            for intent, regex_list in intents.items():
+                compiled_patterns[category][intent] = [
+                    (re.compile(pattern, re.IGNORECASE), pattern) for pattern in regex_list
+                ]
+
+        return compiled_patterns
 
     def _normalize_genre(self, word: str) -> str | None:
         for genre in self.genres:
@@ -69,15 +76,20 @@ class NLPService:
                 break
         
         return result
-    
-    def _extract_pattern(self, query: str) -> dict | None:
-        for key, pattern in self.compiled_patterns.items():
-            match = pattern.match(query.strip())
-            if match:
-                return {
-                    "intent": key,
-                    "keyword": match.group(1).strip()
-                }
+
+    def extract_intent_and_keyword(self, query: str) -> dict | None:
+        query = query.strip().rstrip('?.!')
+        for category, intents in self.compiled_patterns.items():
+            for intent, pattern_list in intents.items():
+                for compiled_regex, _ in pattern_list:
+                    match = compiled_regex.match(query)
+                    if match:
+                        keyword = match.group(1).strip()
+                        return {
+                            "category": category,
+                            "intent": intent,
+                            "keyword": keyword
+                        }
         return None
 
     async def update_genres(self, genres: list[str] | None = None) -> None:
@@ -87,4 +99,4 @@ class NLPService:
         return self._extract_info(query=query)
     
     async def parse_pattern(self, query: str) -> dict:
-        return self._extract_pattern(query=query)
+        return self.extract_intent_and_keyword(query=query)

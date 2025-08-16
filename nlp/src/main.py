@@ -1,11 +1,9 @@
-import asyncio
 from contextlib import asynccontextmanager
 import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# from src.api import health_router, shortener_router
 from src.api import router
 from src.core import Container, get_settings, setup_logging
 
